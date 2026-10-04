@@ -7,6 +7,14 @@ pipeline {
         timeout(time: 10, unit: 'MINUTES')
     }
 
+    parameters {
+        booleanParam(
+            name: 'ENABLE_AI_RECOVERY',
+            defaultValue: true,
+            description: 'Automatically diagnose and repair the test-folder error using AI'
+        )
+    }
+
     stages {
         stage('Checkout') {
             steps {
@@ -22,15 +30,21 @@ pipeline {
             }
         }
 
-        stage('AI Diagnosis and Recovery') {
+        stage('Run Tests and Optional AI Recovery') {
             steps {
-                withCredentials([
-                    string(
-                        credentialsId: 'gemini-api-key',
-                        variable: 'GEMINI_API_KEY'
-                    )
-                ]) {
-                    bat '".venv\\Scripts\\python.exe" -u ai_recovery.py'
+                script {
+                    if (params.ENABLE_AI_RECOVERY) {
+                        withCredentials([
+                            string(
+                                credentialsId: 'gemini-api-key',
+                                variable: 'GEMINI_API_KEY'
+                            )
+                        ]) {
+                            bat '".venv\\Scripts\\python.exe" -u ai_recovery.py'
+                        }
+                    } else {
+                        bat '".venv\\Scripts\\python.exe" -u ai_recovery.py --no-ai'
+                    }
                 }
             }
         }

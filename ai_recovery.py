@@ -43,6 +43,10 @@ def main():
     if exit_code == 0:
         print("Tests already passed. Recovery is unnecessary.")
         return 0
+    
+    if "--no-ai" in sys.argv:
+        print("\nAI recovery is disabled. Build remains failed.")
+        return 1
 
     # This demo repairs missing test-folder configuration only.
     if exit_code != 4 or "file or directory not found" not in output:
